@@ -2,45 +2,116 @@ from data import *
 import numpy as np
 import random
 import math
+from matplotlib import pyplot as plt
+
+class Layer():
+	def __init__(self, layer_size,input_size,activation='tanh',fixed_weights=False):
+		self.fixed_weights = fixed_weights
+
+		if self.fixed_weights == False:
+			self.weights=[[random.random() for _ in range(input_size)] for _ in range(layer_size)]
+		else:
+			self.weights=[[fixed_weights for _ in range(input_size)] for _ in range(layer_size)]
+
+		self.states = [None]*layer_size
+		self.activation = activation
+
+	def feed_forward(self, input):
+		self.states = [np.dot(input,weight) for weight in self.weights]
+
+		if self.activation == 'tanh':
+			self.states = np.tanh(self.states)
 
 
-class Model():
-	def __init__(self, hidden_units=2, input_size = 2):
-		self.states=[[None]*input_size,[0]*hidden_units,[None]]
-		self.weights = [  [ ],	[[1]*hidden_units]]
+	def activation_derivative(self,index=0):
+		if self.activation == 'tanh':
+			return 1 - (self.states[index] *self.states[index])
+		else:
+			return 1
 
-		for x in range(0,hidden_units):
-			self.weights[0].append([random.random() for _ in range(input_size)])
+	def update(self,gradients,learning_rate = 0.05):
+		for weight_vector_index in range(0,len(self.weights)):
+			for weight_index in range(0,len(self.weights[weight_vector_index])):
+				self.weights[weight_vector_index][weight_index] = self.weights[weight_vector_index][weight_index] - (learning_rate * gradients[weight_vector_index][weight_index])
 
-		print(self.states)
-		print(self.weights)
 
+
+class New_Model():
+	def __init__(self,input_size = 2):
+		self.input_size = input_size
+		self.layers = []
+
+	def add_layer(self,states=2,activation=None,fixed_weights=False):
+		if len(self.layers)==0:
+			self.layers.append(Layer(layer_size=states,input_size=self.input_size,activation=activation,fixed_weights=fixed_weights))
+		else:
+			self.layers.append(Layer(layer_size=states,input_size=len(self.layers[-1].states),activation=activation,fixed_weights=fixed_weights))
+
+	def display(self):
+		print("input: ",self.input_size)
+		print("xxxxxxxxxxxxxxxxxxxx")
+		for layer in self.layers:
+			print(layer.states)
+		print("-------------------------")
+		for layer in self.layers:
+			print(layer.weights)
 
 
 	def __feed_forward(self):
-		for layer in range(1,len(self.states)):
-			for state in range(0,len(self.states[layer])):
+		self.layers[0].feed_forward(self.input)
 
-				if layer == len(self.states)-1:
-					self.states[layer][state] = np.dot(self.states[layer-1],self.weights[layer-1][state])
+		for layer in range(1,len(self.layers)):
+			self.layers[layer].feed_forward(self.layers[layer-1].states)
 
-				else:
-					self.states[layer][state] = np.dot(self.states[layer-1],self.weights[layer-1][state])
+	def __stochastic_update(self,gradients):
+		for layer in range(0,len(self.layers)):
+			if self.layers[layer].fixed_weights == False:
+				self.layers[layer].update(gradients[layer],learning_rate = self.learning_rate)
 
-					self.states[layer][state] = np.tanh(self.states[layer][state])
+	def __back_propagation(self,target_label):
+		delta = self.layers[-1].states[0] - target_label
+
+		gradients = [[] for _ in self.layers]
+		for layer in reversed(range(0,len(self.layers))):
+
+			
+
+			if layer == len(self.layers)-1: #For the last layer
+				delta = delta*self.layers[-1].activation_derivative(index = 0)
+
+
+				for weight in range(0,len(self.layers[-1].weights)): ###This is for V_n's
+					gradients[layer].append([])
+					for w_index in range(0,len(self.layers[layer].weights[weight])):
+						
+						gradients[layer][-1].append(delta * self.layers[layer - 1].states[w_index])
+
+			else:
+				for weight_vector_index in range(0,len(self.layers[layer].weights))	:
+					gradients[layer].append([])
+					for w_index in range(0,len(self.layers[layer].weights[weight_vector_index])):
+
+						gradients[layer][-1].append(delta * self.layers[layer+1].weights[0][0] * self.layers[layer].activation_derivative(index = weight_vector_index) * self.input[w_index])
+		
+
+		self.__stochastic_update(gradients)
 
 
 	def __error(self,target_label): #this error is e^mu
-		error = self.states[-1][0]-target_label
+
+		error = self.layers[-1].states[0]-target_label
 		error = error*error/2
 		self.error.append(error)
 
 
 	def train(self, x_train,y_train,ephochs=10,learning_rate=0.05):
-		if x_train.shape[1]!=len(self.states[0]):
+		self.learning_rate = learning_rate
+		if x_train.shape[1]!=self.input_size:
 			print("Data shape does not match model shape")
 			return
 
+
+		loss_ = []
 		for epoch in range(0,ephochs):
 			print("\n\n=============================")
 			print("Epoch "+str(epoch))
@@ -49,29 +120,44 @@ class Model():
 			self.error = []
 
 			for sample in range(0,x_train.shape[0]):
-				print("\nFeed forward Sample "+str(sample))
+				# print("\nFeed forward Sample "+str(sample))
 
 
 				
-				self.states[0] = list(x_train[sample])
+				self.input = list(x_train[sample])
 
 				self.__feed_forward()
 
 				self.__error(y_train[sample])
 
-				print("Error: ",self.error[sample])
+				# print("Error: ",self.error[sample])
 
 
-				print(self.states)
-				print(self.weights)
+				# self.display()
+
+				self.__back_propagation(y_train[sample])
+			print("----------------------------")
+			print("EPOCH LOSS = ",sum(self.error)/len(self.error))
+			print("==========================")
 		
-		
+			loss_.append(sum(self.error)/len(self.error))
+
+
+		plt.plot(loss_)
+
+		plt.show()
 
 
 
-data = Population(size=8,mean=0,variance=1.0,number_of_features=3)
+data = Population(size=5,mean=0.5,variance=0.1,number_of_features=10)
 
-model = Model(hidden_units=2,input_size=data.dataset.shape[1])
+data.plot(data.dataset.shape[1])
 
-model.train(data.dataset,data.label,ephochs=1)
+model = New_Model(input_size=data.dataset.shape[1])
 
+model.add_layer(states = 2,activation = 'tanh',fixed_weights=False)
+model.add_layer(states =1,activation = None,fixed_weights=False)
+
+model.display()
+
+model.train(data.dataset,data.label,ephochs=200,learning_rate=0.05)
