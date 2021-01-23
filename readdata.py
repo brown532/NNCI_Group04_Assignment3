@@ -1,6 +1,8 @@
 
 import os
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 def read_file(feature_path,label_path,P,Q):
 	training_set=[]
@@ -48,8 +50,31 @@ def read_file(feature_path,label_path,P,Q):
 			print(feature_path+" is not in working directory")
 
 
-# trainX,trainY,testX,testY = read_file("xi(1).csv","tau(1).csv",3,2)
 
-# print(trainY)
+def plot(dataset,labels):
+		x_axis = list(range(1,dataset.shape[0]+1))
 
-# print(testY)
+		ax = plt.gca()
+
+		for x in range(0,dataset.shape[1]):
+			y_axis = dataset[:,x]
+
+			ax.scatter(x_axis,y_axis,marker='.',label="attribute "+str(x))#color=(random.random(),random.random(),random.random()))
+
+		plt.xlabel('Sample',fontsize=14)
+		# Set the y axis label of the current axis.
+		plt.ylabel('Attribute Value',fontsize=14)
+		# Set a title of the current axes.
+		plt.title('Dataset',fontsize=20)#'First '+str(attributes_to_plot) + ' attributes of the dataset')
+		# show a legend on the plot
+		# plt.legend(loc='upper right',fontsize = 'x-small')
+		# Display a figure.
+
+		ax.xaxis.set_major_locator(MaxNLocator(nbins=30,integer=True))
+
+		plt.show()
+
+
+trainX,trainY,testX,testY = read_file("xi(1).csv","tau(1).csv",30,2)
+
+plot(trainX,trainY)
