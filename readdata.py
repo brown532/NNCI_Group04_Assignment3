@@ -75,6 +75,6 @@ def plot(dataset,labels):
 		plt.show()
 
 
-trainX,trainY,testX,testY = read_file("xi(1).csv","tau(1).csv",30,2)
+# trainX,trainY,testX,testY = read_file("xi(1).csv","tau(1).csv",30,2)
 
-plot(trainX,trainY)
+# plot(trainX,trainY)

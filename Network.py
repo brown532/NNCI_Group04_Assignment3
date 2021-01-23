@@ -1,43 +1,12 @@
-from data import *
-from readdata import *
+# from readdata import *
+from Layer import Layer
+
 import numpy as np
 import random
-import math
-from matplotlib import pyplot as plt
-
-class Layer():
-	def __init__(self, layer_size,input_size,activation='tanh',fixed_weights=False):
-		self.fixed_weights = fixed_weights
-
-		if self.fixed_weights == False:
-			self.weights=[[random.random() for _ in range(input_size)] for _ in range(layer_size)]
-		else:
-			self.weights=[[fixed_weights for _ in range(input_size)] for _ in range(layer_size)]
-
-		self.states = [None]*layer_size
-		self.activation = activation
-
-	def feed_forward(self, input):
-		self.states = [np.dot(input,weight) for weight in self.weights]
-
-		if self.activation == 'tanh':
-			self.states = np.tanh(self.states)
+# import math
 
 
-	def activation_derivative(self,index=0):
-		if self.activation == 'tanh':
-			return 1 - (self.states[index] *self.states[index])
-		else:
-			return 1
-
-	def update(self,gradients,learning_rate = 0.05):
-		for weight_vector_index in range(0,len(self.weights)):
-			for weight_index in range(0,len(self.weights[weight_vector_index])):
-				self.weights[weight_vector_index][weight_index] = self.weights[weight_vector_index][weight_index] - (learning_rate * gradients[weight_vector_index][weight_index])
-
-
-
-class New_Model():
+class Model():
 	def __init__(self,input_size = 2):
 		self.input_size = input_size
 		self.layers = []
@@ -104,7 +73,7 @@ class New_Model():
 		error = error*error/2
 		self.error.append(error)
 
-	def __validation(self,x_test,y_test):
+	def __MSE(self,x_test,y_test): #Mean Squared Error
 		g_error = []
 		for indx,x in enumerate(x_test):
 			self.input = x
@@ -120,7 +89,7 @@ class New_Model():
 
 
 
-	def train(self, x_train,y_train,x_test,y_test,ephochs=10,learning_rate=0.05):
+	def train(self, x_train,y_train,x_test,y_test,ephochs=10,learning_rate=0.05,verbose=False):
 		self.learning_rate = learning_rate
 		if x_train.shape[1]!=self.input_size:
 			print("Data shape does not match model shape")
@@ -130,24 +99,27 @@ class New_Model():
 		loss_ = []
 		generalization_loss = []
 
-		loss_.append(self.__validation(x_train,y_train))
-		generalization_loss.append(self.__validation(x_test,y_test))
+		loss_.append(self.__MSE(x_train,y_train))
+		generalization_loss.append(self.__MSE(x_test,y_test))
 
-		print("\n\n=============================")
-		print("----------------------------")
-		print("INITIAL EMPIRICAL ERROR = ",loss_[-1])
-		print("INITIAL VALIDATION ERROR = ",generalization_loss[-1])
-		
-		print("==========================")
+
+		if verbose:
+			print("\n\n=============================")
+			print("----------------------------")
+			print("INITIAL EMPIRICAL ERROR = ",loss_[-1])
+			print("INITIAL VALIDATION ERROR = ",generalization_loss[-1])
+			
+			print("==========================")
 
 
 
 
 		for epoch in range(0,ephochs):
 			# self.display()
-			print("\n\n=============================")
-			print("Epoch "+str(epoch+1))
-			print("=============================")
+			if verbose:
+				print("\n\n=============================")
+				print("Epoch "+str(epoch+1))
+				print("=============================")
 
 			self.error = []
 
@@ -164,64 +136,21 @@ class New_Model():
 
 				self.__error(y_train[sample])
 
-				# print("Error: ",self.error[sample])
-
-
-				# self.display()
-
 				self.__back_propagation(y_train[sample])
 
 
 
 			
-			loss_.append(sum(self.error)/len(self.error))
+			loss_.append(self.__MSE(x_train,y_train))
 
-			generalization_loss.append(self.__validation(x_test,y_test))
-
-
-			print("----------------------------")
-			print("EPOCH EMPIRICAL ERROR = ",loss_[-1])
-			print("EPOCH VALIDATION ERROR = ",generalization_loss[-1])
-			
-			print("==========================")
-		
+			generalization_loss.append(self.__MSE(x_test,y_test))
 
 
+			if verbose:
+				print("----------------------------")
+				print("EPOCH EMPIRICAL ERROR = ",loss_[-1])
+				print("EPOCH VALIDATION ERROR = ",generalization_loss[-1])
+				
+				print("==========================")
 
-
-		plt.plot(loss_,marker='o',label="Empirical Error")
-		plt.title("Errors")
-
-		plt.plot(generalization_loss,marker='x',label="Validation Error")
-
-
-		plt.xlabel('epoch')
-		plt.ylabel('Loss')
-
-		plt.legend()
-		plt.show()
-
-		
-
-
-
-# data = Population(size=5,mean=0.5,variance=0.1,number_of_features=10)
-
-# data.plot(data.dataset.shape[1])
-
-P=200
-Q=100
-
-trainX,trainY,testX,testY = read_file("xi(1).csv","tau(1).csv",P,Q)
-
-
-
-model = New_Model(input_size=len(trainX[0]))
-
-model.add_layer(states = 10,activation = 'tanh',fixed_weights=False)
-model.add_layer(states =1,activation = None,fixed_weights=1)
-
-# model.display()
-
-# print(trainX.shape)
-model.train(trainX,trainY,testX,testY,ephochs=100,learning_rate=0.5)
+		return loss_,generalization_loss
