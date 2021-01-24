@@ -87,10 +87,9 @@ class Model():
 		return(sum(g_error)/len(g_error))
 
 
-
-
-	def train(self, x_train,y_train,x_test,y_test,ephochs=10,learning_rate=0.05,learning_rate_decay=False,verbose=False,return_weights=False):
+	def train(self, x_train,y_train,x_test,y_test,ephochs=10,learning_rate=0.05,learning_rate_decay=False,verbose=False,return_weights=False,find_plateaus=False):
 		self.learning_rate = learning_rate
+		
 		if x_train.shape[1]!=self.input_size:
 			print("Data shape does not match model shape")
 			return

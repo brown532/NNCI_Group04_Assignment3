@@ -1,14 +1,15 @@
-
+import random
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-def read_file(feature_path,label_path,P,Q):
+def read_file(feature_path,label_path,P,Q,shuffle=False):
 	training_set=[]
 	training_set_output = []
 
 	test_set=[]
+	test_set_output=[]
 
 	if os.path.isfile(feature_path) and os.path.isfile(label_path):
 		fin = open(label_path,'r')
@@ -36,6 +37,15 @@ def read_file(feature_path,label_path,P,Q):
 
 		fin.close()
 
+		if shuffle:
+			a = ['a', 'b', 'c']
+			b = [1, 2, 3]
+
+			c = list(zip(training_set, training_set_output))
+			random.shuffle(c)
+
+			training_set,training_set_output = zip(*c)
+			
 		test_set = training_set[P:Q+P]
 		test_set_output = training_set_output[P:Q+P]
 
@@ -73,8 +83,3 @@ def plot(dataset,labels):
 		ax.xaxis.set_major_locator(MaxNLocator(nbins=30,integer=True))
 
 		plt.show()
-
-
-# trainX,trainY,testX,testY = read_file("xi(1).csv","tau(1).csv",30,2)
-
-# plot(trainX,trainY)
