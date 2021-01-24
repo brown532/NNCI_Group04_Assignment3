@@ -2,6 +2,7 @@
 
 
 ## Abstract
+Gradient Descent is a widely used optimization algorithm. It is however not without it's drawbacks as it can be computationally expensive. A commonly used variant is the Stochastic Gradient Descent (SGD). This project uses SGD to optimize the weight vectors of a shallow neural network for a regression task. It explores how the empirical error and validation error of the network changes in the course of training via SGD. It further examines the effects different learning rates have on the convergence of SGD training. Furthermore, it supports our machine learner's intuition that a larger dataset helps increase the generalization of a model by training the network with different sizes of training sets.
 
 
 ## How to run the experiments
