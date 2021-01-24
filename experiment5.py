@@ -57,7 +57,7 @@ for P in P_values:
 
 
 for index,error in enumerate(Errors_for_different_Ps):
-	plt.plot(error,marker='.',label="P="+str(P_values[index]))#,label="Empirical Error(E)")
+	plt.plot(error,label="P="+str(P_values[index]))#,label="Empirical Error(E)")
 
 
 plt.title("Error-Time Graph")
@@ -72,7 +72,7 @@ plt.show()
 
 
 for index,error in enumerate(Error_test_for_different_Ps):
-	plt.plot(error,marker='x',label="P="+str(P_values[index]))#,label="Empirical Error(E)")
+	plt.plot(error,label="P="+str(P_values[index]))#,label="Empirical Error(E)")
 
 
 plt.title("Error-Time Graph")

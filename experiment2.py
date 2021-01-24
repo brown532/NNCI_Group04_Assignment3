@@ -41,10 +41,10 @@ average_E = np.average(Es,axis=0)
 average_Etest = np.average(E_tests,axis = 0)
 
 
-plt.plot(average_E,marker='.',label="Empirical Error(E)")
+plt.plot(average_E,label="Empirical Error(E)")
 plt.title("Error-Time Graph")
 
-plt.plot(average_Etest,marker='x',label="Validation Error(E_test)")
+plt.plot(average_Etest,label="Validation Error(E_test)")
 
 
 plt.xlabel('Time')

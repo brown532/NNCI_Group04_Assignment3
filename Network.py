@@ -89,7 +89,7 @@ class Model():
 
 
 
-	def train(self, x_train,y_train,x_test,y_test,ephochs=10,learning_rate=0.05,verbose=False):
+	def train(self, x_train,y_train,x_test,y_test,ephochs=10,learning_rate=0.05,learning_rate_decay=False,verbose=False,return_weights=False):
 		self.learning_rate = learning_rate
 		if x_train.shape[1]!=self.input_size:
 			print("Data shape does not match model shape")
@@ -103,6 +103,11 @@ class Model():
 		generalization_loss.append(self.__MSE(x_test,y_test))
 
 
+		initial_weights = []
+		finial_weights = []
+		if return_weights:
+			initial_weights = np.copy(self.layers[0].weights)
+
 		if verbose:
 			print("\n\n=============================")
 			print("----------------------------")
@@ -115,7 +120,6 @@ class Model():
 
 
 		for epoch in range(0,ephochs):
-			# self.display()
 			if verbose:
 				print("\n\n=============================")
 				print("Epoch "+str(epoch+1))
@@ -140,11 +144,10 @@ class Model():
 
 
 
-			
-			loss_.append(self.__MSE(x_train,y_train))
+			if not return_weights:
+				loss_.append(self.__MSE(x_train,y_train))
 
-			generalization_loss.append(self.__MSE(x_test,y_test))
-
+				generalization_loss.append(self.__MSE(x_test,y_test))
 
 			if verbose:
 				print("----------------------------")
@@ -152,5 +155,16 @@ class Model():
 				print("EPOCH VALIDATION ERROR = ",generalization_loss[-1])
 				
 				print("==========================")
+			# self.display()
 
-		return loss_,generalization_loss
+			if learning_rate_decay != False:
+				new_LR= self.learning_rate - (self.learning_rate*learning_rate_decay)
+				if new_LR > 0:
+					self.learning_rate = new_LR
+			
+
+		if return_weights:
+			return initial_weights,self.layers[0].weights
+		else:
+			return loss_,generalization_loss
+
